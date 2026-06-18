@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarWorks - Car Workshop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+  /* NAV */
+  nav { background: #1e293b; border-bottom: 2px solid #f97316; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 1.4rem; font-weight: 800; color: #f97316; letter-spacing: 1px; }
+  .logo span { color: #fff; }
+  .nav-links { display: flex; gap: 1rem; }
+  .nav-links button { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: .9rem; padding: .4rem .8rem; border-radius: 6px; transition: .2s; }
+  .nav-links button:hover, .nav-links button.active { background: #f97316; color: #fff; }
+
+  /* SCREENS */
+  .screen { display: none; max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
+  .screen.active { display: block; }
+
+  /* CARDS */
+  .card { background: #1e293b; border-radius: 14px; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+  .card h2 { font-size: 1.3rem; margin-bottom: 1.2rem; color: #f97316; display: flex; align-items: center; gap: .6rem; }
+
+  /* WELCOME */
+  .welcome-hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 14px; border: 1px solid #334155; margin-bottom: 1.5rem; }
+  .welcome-hero h1 { font-size: 2.8rem; font-weight: 900; color: #f97316; margin-bottom: .5rem; }
+  .welcome-hero p { color: #94a3b8; font-size: 1.05rem; margin-bottom: 1.8rem; line-height: 1.7; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .feature { background: #0f172a; border-radius: 10px; padding: 1.2rem; border: 1px solid #334155; text-align: center; }
+  .feature .icon { font-size: 2rem; margin-bottom: .5rem; }
+  .feature p { font-size: .85rem; color: #94a3b8; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: .4rem; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: .85rem; color: #94a3b8; font-weight: 500; }
+  input, select { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: .7rem 1rem; border-radius: 8px; font-size: .95rem; width: 100%; outline: none; transition: border .2s; }
+  input:focus, select:focus { border-color: #f97316; }
+  select option { background: #1e293b; }
+
+  /* BUTTONS */
+  .btn { padding: .75rem 1.8rem; border-radius: 8px; border: none; cursor: pointer; font-size: .95rem; font-weight: 600; transition: .2s; }
+  .btn-primary { background: #f97316; color: #fff; }
+  .btn-primary:hover { background: #ea6c0a; }
+  .btn-secondary { background: #334155; color: #e2e8f0; }
+  .btn-secondary:hover { background: #475569; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-sm { padding: .45rem 1rem; font-size: .85rem; }
+
+  /* SERVICES GRID */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+  .service-card { background: #0f172a; border: 2px solid #334155; border-radius: 10px; padding: 1.3rem; cursor: pointer; transition: .2s; text-align: center; }
+  .service-card:hover { border-color: #f97316; background: #1e293b; }
+  .service-card .sicon { font-size: 2rem; margin-bottom: .6rem; }
+  .service-card h3 { font-size: 1rem; margin-bottom: .3rem; }
+  .service-card p { font-size: .8rem; color: #94a3b8; }
+
+  /* MODAL / PANEL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+  .overlay.open { display: flex; }
+  .modal { background: #1e293b; border-radius: 14px; padding: 2rem; width: 100%; max-width: 520px; border: 1px solid #334155; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 1.2rem; color: #f97316; margin-bottom: 1.2rem; }
+  .option-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.2rem; }
+  .option-btn { background: #0f172a; border: 2px solid #334155; color: #e2e8f0; padding: .9rem 1.2rem; border-radius: 8px; cursor: pointer; text-align: left; font-size: .95rem; transition: .2s; display: flex; justify-content: space-between; align-items: center; }
+  .option-btn:hover { border-color: #f97316; }
+  .option-btn .price { color: #f97316; font-weight: 700; }
+  .modal-actions { display: flex; gap: .8rem; justify-content: flex-end; }
+
+  /* BILL */
+  .bill-box { background: #0f172a; border-radius: 10px; padding: 1.5rem; border: 1px solid #334155; font-family: monospace; }
+  .bill-header { text-align: center; border-bottom: 1px dashed #475569; padding-bottom: 1rem; margin-bottom: 1rem; }
+  .bill-header h2 { color: #f97316; font-size: 1.5rem; }
+  .bill-header p { font-size: .85rem; color: #94a3b8; }
+  .bill-customer { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569; }
+  .bill-row { display: flex; justify-content: space-between; padding: .35rem 0; font-size: .9rem; }
+  .bill-row.total { font-weight: 700; font-size: 1rem; border-top: 1px dashed #475569; margin-top: .5rem; padding-top: .5rem; color: #f97316; }
+  .bill-row.discount { color: #22c55e; }
+  .bill-services { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed #475569; }
+  .added-services { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+  .service-tag { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: .5rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: .9rem; }
+  .service-tag .remove { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; padding: 0 .3rem; }
+
+  /* RECORDS */
+  .record-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 1.2rem; margin-bottom: .8rem; }
+  .record-card h4 { color: #f97316; margin-bottom: .5rem; }
+  .record-info { font-size: .85rem; color: #94a3b8; line-height: 1.8; }
+  .search-bar { display: flex; gap: .8rem; margin-bottom: 1.2rem; }
+  .search-bar input { flex: 1; }
+
+  /* STEP INDICATOR */
+  .steps { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+  .step { flex: 1; height: 4px; background: #334155; border-radius: 2px; transition: .3s; }
+  .step.done { background: #f97316; }
+
+  /* BADGE */
+  .badge { background: #f97316; color: #fff; font-size: .75rem; font-weight: 700; padding: .15rem .5rem; border-radius: 20px; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 2rem; right: 2rem; background: #22c55e; color: #fff; padding: .8rem 1.5rem; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity .3s; z-index: 999; pointer-events: none; }
+  #toast.show { opacity: 1; }
+
+  .empty-state { text-align: center; padding: 3rem; color: #475569; }
+  .empty-state .eicon { font-size: 3rem; margin-bottom: 1rem; }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .welcome-hero h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Car<span>Works</span></div>
+  <div class="nav-links">
+    <button onclick="showScreen('welcome')" class="active" id="nav-welcome">Home</button>
+    <button onclick="showScreen('booking')" id="nav-booking">New Booking</button>
+    <button onclick="showScreen('records')" id="nav-records">Records</button>
+  </div>
+</nav>
+
+<!-- WELCOME SCREEN -->
+<div class="screen active" id="screen-welcome">
+  <div class="welcome-hero">
+    <h1>CarWorks</h1>
+    <p>We provide only verified, background-checked and high-quality professionals.<br>
+    We match you with the right service centers with the right budget.<br>
+    Free pickup &amp; drop for super convenient service from booking to delivery.</p>
+    <button class="btn btn-primary" onclick="showScreen('booking')" style="font-size:1.1rem;padding:1rem 2.5rem;">Book a Service</button>
+  </div>
+  <div class="features">
+    <div class="feature"><div class="icon">🔧</div><h3>Regular Service</h3><p>Express, Standard &amp; Standard+ packages</p></div>
+    <div class="feature"><div class="icon">🚿</div><h3>Car Washing</h3><p>Complete, Interior &amp; Quick Wash options</p></div>
+    <div class="feature"><div class="icon">⚙️</div><h3>Wheel Care</h3><p>Alignment &amp; Balancing by experts</p></div>
+    <div class="feature"><div class="icon">❄️</div><h3>AC Service</h3><p>Full AC servicing &amp; repair</p></div>
+    <div class="feature"><div class="icon">🛑</div><h3>Brake Service</h3><p>Brake inspection &amp; replacement</p></div>
+    <div class="feature"><div class="icon">💰</div><h3>10% Discount</h3><p>On bills above ₹10,000</p></div>
+  </div>
+</div>
+
+<!-- BOOKING SCREEN -->
+<div class="screen" id="screen-booking">
+  <!-- Step 1: Customer Info -->
+  <div id="step-customer">
+    <div class="card">
+      <h2>📋 Your Details</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Car Number *</label>
+          <input type="text" id="car_no" placeholder="e.g. MP09AB1234">
+        </div>
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="cust_name" placeholder="Your name">
+        </div>
+        <div class="form-group full">
+          <label>Address *</label>
+          <input type="text" id="cust_address" placeholder="Your address">
+        </div>
+        <div class="form-group">
+          <label>Contact Number *</label>
+          <input type="tel" id="cust_contact" placeholder="10-digit number">
+        </div>
+        <div class="form-group">
+          <label>ZIP Code *</label>
+          <input type="text" id="cust_zip" placeholder="e.g. 462001">
+        </div>
+      </div>
+      <br>
+      <button class="btn btn-primary" onclick="submitCustomer()">Continue to Services →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Service Selection -->
+  <div id="step-services" style="display:none">
+    <div class="card" style="padding-bottom:1rem">
+      <h2>🛠️ Select Services</h2>
+      <div class="services-grid">
+        <div class="service-card" onclick="openServiceModal(1)">
+          <div class="sicon">🔧</div>
+          <h3>Regular Service</h3>
+          <p>Oil change, filter, tune-up</p>
+        </div>
+        <div class="service-card" onclick="openServiceModal(2)">
+          <div class="sicon">🚿</div>
+          <h3>Car Washing</h3>
+          <p>Interior &amp; exterior cleaning</p>
+        </div>
+        <div class="service-card" onclick="openServiceModal(3)">
+          <div class="sicon">⚙️</div>
+          <h3>Wheel Care</h3>
+          <p>Alignment &amp; balancing</p>
+        </div>
+        <div class="service-card" onclick="addFlatService('AC Servicing', 5000)">
+          <div class="sicon">❄️</div>
+          <h3>AC Service</h3>
+          <p>₹5,000 flat</p>
+        </div>
+        <div class="service-card" onclick="addFlatService('Brakes Service', 1500)">
+          <div class="sicon">🛑</div>
+          <h3>Brake Service</h3>
+          <p>₹1,500 flat</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Added services -->
+    <div class="card" id="added-panel" style="display:none">
+      <h2>🧾 Added Services <span class="badge" id="service-count">0</span></h2>
+      <div class="added-services" id="added-list"></div>
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="proceedToBill()">Generate Bill →</button>
+        <button class="btn btn-secondary" onclick="showScreen('booking')">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Bill -->
+  <div id="step-bill" style="display:none">
+    <div class="card">
+      <h2>🧾 Your Bill</h2>
+      <div class="bill-box" id="bill-content"></div>
+      <br>
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-secondary" onclick="startOver()">New Booking</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECORDS SCREEN -->
+<div class="screen" id="screen-records">
+  <div class="card">
+    <h2>📁 Customer Records</h2>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search by car number or name..." oninput="renderRecords()">
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('search-input').value='';renderRecords()">Clear</button>
+    </div>
+    <div id="records-list"></div>
+  </div>
+</div>
+
+<!-- SERVICE MODAL (Regular / Washing / Wheel) -->
+<div class="overlay" id="service-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Select Options</h3>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const CAR_MAKES = ['BMW','Honda','Hyundai','Maruti Suzuki','Volkswagen','Nissan','Toyota'];
+const FUEL_TYPES = ['Petrol','Diesel','CNG'];
+
+// Prices indexed by [fuelIndex] (0=Petrol,1=Diesel,2=CNG)
+const REGULAR_PRICES = {
+  'Express':    [1800, 2000, 2200],
+  'Standard':   [2400, 2600, 2800],
+  'Standard+':  [3500, 3700, 3800]
+};
+const WASHING_PRICES = {
+  'Complete Cleaning':  [2900, 2700, 3000],
+  'Interior Cleaning':  [1500, 1400, 1800],
+  'Quick Wash':         [900,  1000, 1100]
+};
+const WHEEL_PRICES = {
+  'Alignment':              [800,  1000, 900],
+  'Balancing & Alignment':  [1200, 1400, 1300]
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let customer = {};
+let addedServices = [];   // {label, price}
+let currentServiceType = null;
+let modalStep = 0;
+let modalMake = -1;
+let modalFuel = -1;
+
+// ─── NAVIGATION ─────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'records') renderRecords();
+}
+
+// ─── CUSTOMER FORM ──────────────────────────────────────────────────────────
+function submitCustomer() {
+  const car_no  = document.getElementById('car_no').value.trim().toUpperCase();
+  const name    = document.getElementById('cust_name').value.trim();
+  const address = document.getElementById('cust_address').value.trim();
+  const contact = document.getElementById('cust_contact').value.trim();
+  const zip     = document.getElementById('cust_zip').value.trim();
+  if (!car_no || !name || !address || !contact || !zip) {
+    toast('Please fill in all fields', '#ef4444'); return;
+  }
+  customer = { car_no, name, address, contact, zip, date: new Date().toLocaleString() };
+  addedServices = [];
+  document.getElementById('step-customer').style.display = 'none';
+  document.getElementById('step-services').style.display = 'block';
+  document.getElementById('added-panel').style.display = 'none';
+  renderAddedServices();
+}
+
+// ─── SERVICE MODAL ──────────────────────────────────────────────────────────
+function openServiceModal(type) {
+  currentServiceType = type;
+  modalStep = 0; modalMake = -1; modalFuel = -1;
+  const titles = {1:'Regular Service',2:'Car Washing',3:'Wheel Care'};
+  document.getElementById('modal-title').textContent = titles[type];
+  renderModalStep();
+  document.getElementById('service-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('service-overlay').classList.remove('open');
+}
+
+function renderModalStep() {
+  const body = document.getElementById('modal-body');
+  if (modalStep === 0) {
+    body.innerHTML = `<p style="color:#94a3b8;margin-bottom:.8rem;font-size:.9rem;">Select Car Make</p>
+      <div class="option-list">${CAR_MAKES.map((m,i)=>`<button class="option-btn" onclick="modalMake=${i};modalStep=1;renderModalStep()">${m}</button>`).join('')}</div>`;
+  } else if (modalStep === 1) {
+    body.innerHTML = `<p style="color:#94a3b8;margin-bottom:.8rem;font-size:.9rem;">Select Fuel Type</p>
+      <div class="option-list">${FUEL_TYPES.map((f,i)=>`<button class="option-btn" onclick="modalFuel=${i};modalStep=2;renderModalStep()">${f}</button>`).join('')}</div>
+      <button class="btn btn-secondary btn-sm" onclick="modalStep=0;renderModalStep()">← Back</button><br><br>`;
+  } else if (modalStep === 2) {
+    const prices = currentServiceType===1 ? REGULAR_PRICES : currentServiceType===2 ? WASHING_PRICES : WHEEL_PRICES;
+    const items = Object.entries(prices);
+    body.innerHTML = `<p style="color:#94a3b8;margin-bottom:.8rem;font-size:.9rem;">Select Service Type for <b style="color:#f97316">${CAR_MAKES[modalMake]}</b> – <b style="color:#f97316">${FUEL_TYPES[modalFuel]}</b></p>
+      <div class="option-list">${items.map(([label,priceArr])=>{
+        const p = priceArr[modalFuel];
+        const serviceNames = {1:'Regular',2:'Washing',3:'Wheel'};
+        const fullLabel = `${label} (${serviceNames[currentServiceType]})`;
+        return `<button class="option-btn" onclick="addService('${fullLabel}',${p})">${label}<span class="price">₹${p.toLocaleString()}</span></button>`;
+      }).join('')}</div>
+      <button class="btn btn-secondary btn-sm" onclick="modalStep=1;renderModalStep()">← Back</button><br><br>`;
+  }
+}
+
+function addService(label, price) {
+  addedServices.push({ label, price });
+  renderAddedServices();
+  closeModal();
+  toast(`Added: ${label}`);
+}
+
+function addFlatService(label, price) {
+  addedServices.push({ label, price });
+  renderAddedServices();
+  toast(`Added: ${label}`);
+}
+
+function removeService(idx) {
+  addedServices.splice(idx, 1);
+  renderAddedServices();
+}
+
+function renderAddedServices() {
+  const list = document.getElementById('added-list');
+  const panel = document.getElementById('added-panel');
+  const countEl = document.getElementById('service-count');
+  if (addedServices.length === 0) {
+    panel.style.display = 'none'; return;
+  }
+  panel.style.display = 'block';
+  countEl.textContent = addedServices.length;
+  list.innerHTML = addedServices.map((s,i)=>`
+    <div class="service-tag">
+      <span>${s.label}</span>
+      <div style="display:flex;align-items:center;gap:.8rem">
+        <span style="color:#f97316;font-weight:700">₹${s.price.toLocaleString()}</span>
+        <button class="remove" onclick="removeService(${i})" title="Remove">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ─── BILL ────────────────────────────────────────────────────────────────────
+function proceedToBill() {
+  if (addedServices.length === 0) { toast('Add at least one service', '#ef4444'); return; }
+  document.getElementById('step-services').style.display = 'none';
+  document.getElementById('step-bill').style.display = 'block';
+
+  const total = addedServices.reduce((s,x)=>s+x.price, 0);
+  const discount = total > 10000;
+  const final = discount ? total * 0.9 : total;
+
+  const billHTML = `
+    <div class="bill-header">
+      <h2>CarWorks</h2>
+      <p>Date: ${customer.date}</p>
+    </div>
+    <div class="bill-customer">
+      <div class="bill-row"><span>Car Number</span><span>${customer.car_no}</span></div>
+      <div class="bill-row"><span>Name</span><span>${customer.name}</span></div>
+      <div class="bill-row"><span>Address</span><span>${customer.address}</span></div>
+      <div class="bill-row"><span>Contact</span><span>${customer.contact}</span></div>
+      <div class="bill-row"><span>ZIP Code</span><span>${customer.zip}</span></div>
+    </div>
+    <div class="bill-services">
+      <b style="color:#94a3b8;font-size:.85rem;display:block;margin-bottom:.5rem">SERVICES AVAILED</b>
+      ${addedServices.map((s,i)=>`<div class="bill-row"><span>${i+1}. ${s.label}</span><span>₹${s.price.toLocaleString()}</span></div>`).join('')}
+    </div>
+    <div class="bill-row total"><span>Total</span><span>₹${total.toLocaleString()}</span></div>
+    ${discount ? `<div class="bill-row discount"><span>Discount (10%)</span><span>-₹${(total*0.1).toLocaleString()}</span></div>` : `<div class="bill-row" style="color:#94a3b8;font-size:.8rem"><span>No discount (10% on bills &gt; ₹10,000)</span><span>₹0</span></div>`}
+    <div class="bill-row total" style="font-size:1.2rem;margin-top:.3rem"><span>Amount to Pay</span><span>₹${final.toLocaleString()}</span></div>
+  `;
+  document.getElementById('bill-content').innerHTML = billHTML;
+
+  // Save to localStorage
+  const records = JSON.parse(localStorage.getItem('cw_records') || '[]');
+  records.unshift({ ...customer, services: addedServices, total, discount, final });
+  localStorage.setItem('cw_records', JSON.stringify(records));
+}
+
+function startOver() {
+  customer = {}; addedServices = [];
+  document.getElementById('car_no').value='';
+  document.getElementById('cust_name').value='';
+  document.getElementById('cust_address').value='';
+  document.getElementById('cust_contact').value='';
+  document.getElementById('cust_zip').value='';
+  document.getElementById('step-customer').style.display='block';
+  document.getElementById('step-services').style.display='none';
+  document.getElementById('step-bill').style.display='none';
+}
+
+// ─── RECORDS ─────────────────────────────────────────────────────────────────
+function renderRecords() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const records = JSON.parse(localStorage.getItem('cw_records') || '[]');
+  const filtered = records.filter(r =>
+    r.car_no.toLowerCase().includes(q) ||
+    r.name.toLowerCase().includes(q) ||
+    r.contact.includes(q)
+  );
+  const list = document.getElementById('records-list');
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="eicon">📂</div><p>${records.length===0?'No records yet. Make a booking first.':'No matching records found.'}</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map((r,i)=>`
+    <div class="record-card">
+      <h4>${r.car_no} — ${r.name}</h4>
+      <div class="record-info">
+        📍 ${r.address} &nbsp;|&nbsp; 📞 ${r.contact} &nbsp;|&nbsp; 📮 ${r.zip}<br>
+        🗓️ ${r.date}<br>
+        🛠️ Services: ${r.services.map(s=>s.label).join(', ')}<br>
+        💰 <b style="color:#f97316">Final Amount: ₹${r.final.toLocaleString()}</b>${r.discount?' (10% discount applied)':''}
+      </div>
+    </div>`).join('');
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, color='#22c55e') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = color;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// Close modal on overlay click
+document.getElementById('service-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
